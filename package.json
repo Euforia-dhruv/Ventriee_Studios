@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "description": "Ventriee Studios - local-first multi-agent AI software studio",
+  "author": { "name": "Ventriee Studios", "email": "ventriee@example.com" },
+  "homepage": "https://github.com/Euforia-dhruv/ventriee-studios",
   "main": "out/main/index.js",
   "type": "module",
   "scripts": {

@@ -33,10 +33,13 @@ win:
 linux:
   icon: build/icon.png
   category: Development
+  syncDesktopName: true
+  maintainer: Ventriee Studios <ventriee@example.com>
+  # Windows cannot build AppImage (symlink EPERM) or deb (fpm/Ruby absent).
+  # tar.gz is the portable Linux binary buildable from Windows; AppImage and
+  # deb are produced on Linux/CI with the same config.
   target:
-    - target: AppImage
-      arch: [x64]
-    - target: deb
+    - target: tar.gz
       arch: [x64]
   executableName: ventriee-studios
   synopsis: Local-first multi-agent AI creation studio

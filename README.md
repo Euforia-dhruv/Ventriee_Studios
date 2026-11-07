@@ -58,17 +58,24 @@ memory). Delete that folder to start clean; project folders are never touched by
 
 ### Linux
 
-From the latest release, download the AppImage or `.deb`:
+From the latest release:
+
+- Download **`ventriee-studios-<version>-linux-x64.tar.gz`** (portable binary, built from Windows)
+- Or, if a CI/Linux build is published: the **AppImage** and **`.deb`**
 
 ```bash
-# AppImage
-chmod +x Ventriee-Studios-<version>.AppImage
-./Ventriee-Studios-<version>.AppImage
+# portable tarball
+tar -xzf ventriee-studios-<version>-linux-x64.tar.gz
+./ventriee-studios
 
-# Debian/Ubuntu
+# Debian/Ubuntu (from a Linux-built .deb)
 sudo dpkg -i ventriee-studios_<version>_amd64.deb
 ventriee-studios
 ```
+
+> Note: AppImage and deb packages require building on Linux (or CI) because they need
+> symlink privileges and the `fpm` tool, which Windows cannot provide. The tarball is
+> the Linux build produced on Windows.
 
 ## Build from source
 
