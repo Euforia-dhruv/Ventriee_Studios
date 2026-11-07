@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build output
+out/
+dist/
+artifacts/
+*.log
+
+# electron-builder
+*.blockmap
+
+# OS
+.DS_Store
+Thumbs.db
+
+# temp / local
+.npm/
+.tmp/
+*.tmp
+
+# user data / secrets (never commit)
+*.env
+.env
+.env.local
+!*.env.example

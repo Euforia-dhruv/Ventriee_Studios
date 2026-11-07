@@ -1,0 +1,65 @@
+appId: com.ventriee.studios
+productName: Ventriee Studios
+copyright: Copyright © 2026 Ventriee Studios
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**
+  - package.json
+
+# The bundled SKILL.md library is read from process.resourcesPath when packaged.
+extraResources:
+  - from: resources/skills
+    to: skills
+  # The running window reads this; the exe and shortcuts get the .ico.
+  - from: build/icon.png
+    to: icon.png
+
+asar: true
+compression: normal
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  executableName: ventriee-studios
+
+linux:
+  icon: build/icon.png
+  category: Development
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+  executableName: ventriee-studios
+  synopsis: Local-first multi-agent AI creation studio
+  description: >-
+    Ventriee Studios is a private, local-first AI software studio. Plan in chat,
+    generate works refine a development prompt, assign real CLI agents (OpenCode,
+    Claude Code, Codex, Gemini, Ollama) and watch them work in a live office with
+    an always-visible preview.
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Ventriee Studios
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  artifactName: ${productName}-${version}-setup.${ext}
+  deleteAppDataOnUninstall: false
+
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+
+publish: null
