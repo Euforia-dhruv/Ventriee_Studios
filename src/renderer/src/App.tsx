@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useStore } from './store'
+import { guard, useStore } from './store'
 import { Modal, NewProjectDialog, ProjectSwitcher, Toast } from './shell'
 import { Floor } from './components/Floor'
 import { Rail } from './components/Rail'
@@ -168,7 +168,41 @@ export function App() {
           </p>
         </Modal>
       ) : null}
+      {project && configured === 0 && !snapshot.settings.onboardingSeen ? (
+        <OnboardingModal onClose={() => void guard(() => window.ventriee.saveSettings({ onboardingSeen: true }))} />
+      ) : null}
       <Toast />
     </div>
+  )
+}
+
+/** First-run: no engine is usable yet, tell the owner what to install or configure. */
+function OnboardingModal({ onClose }: { onClose: () => void }) {
+  return (
+    <Modal title="Set up an engine to start" onClose={onClose} narrow>
+      <p className="dim" style={{ fontSize: 12, lineHeight: 1.6 }}>
+        Ventriee runs agents through CLI tools or API providers. None are ready on this machine yet. Pick one path:
+      </p>
+      <div className="kv-row" style={{ marginTop: 10 }}>
+        <div className="kv-row-main">
+          <div className="kv-row-title">CLI agent (recommended)</div>
+          <div className="kv-row-sub">
+            Install and sign in to one of these, then restart: OpenCode (<span className="mono">npm i -g opencode-ai</span>), Claude Code (<span className="mono">claude</span>), Codex, or Ollama.
+          </div>
+        </div>
+      </div>
+      <div className="kv-row">
+        <div className="kv-row-main">
+          <div className="kv-row-title">API provider</div>
+          <div className="kv-row-sub">Add a provider and API key in Settings → Providers (OpenAI, Anthropic, Gemini, OpenRouter, DeepSeek, Mistral, local Ollama/LM Studio).</div>
+        </div>
+      </div>
+      <div className="flex gap-8" style={{ marginTop: 14 }}>
+        <button className="btn primary" onClick={onClose}>I'll set it up</button>
+        <button className="btn" onClick={() => void guard(() => window.ventriee.openExternal('https://github.com/Euforia-dhruv/Ventriee_Studios#engines'))}>
+          Read the guide
+        </button>
+      </div>
+    </Modal>
   )
 }

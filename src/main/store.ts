@@ -42,7 +42,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   costPreference: 'balanced',
   plannerEngine: 'cli-opencode',
   plannerModel: '',
-  plannerEndpoint: ''
+  plannerEndpoint: '',
+  onboardingSeen: false
 }
 
 export class Store {

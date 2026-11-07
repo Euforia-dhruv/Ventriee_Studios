@@ -348,6 +348,8 @@ export interface AppSettings {
   plannerEngine: EngineKind
   plannerModel: string
   plannerEndpoint: string
+  /** Set true once the first-run engine onboarding has been dismissed. */
+  onboardingSeen?: boolean
 }
 
 export type ArtifactKind =
