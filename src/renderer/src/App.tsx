@@ -12,7 +12,7 @@ import { SettingsPanel } from './panels/SettingsPanel'
 import { MemoryPanel } from './panels/MemoryPanel'
 import { AutomationsPanel, SkillsPanel } from './panels/SkillsPanel'
 import { ProjectPanel } from './panels/ProjectPanel'
-import { IconMemory, IconClock, IconSettings, IconSkill } from './icons'
+import { IconMemory, IconClock, IconSettings, IconSkill, IconSpark } from './icons'
 
 export function App() {
   const snapshot = useStore((s) => s.snapshot)
@@ -137,6 +137,9 @@ export function App() {
         <button className={`icon-btn${panel === 'settings' ? ' active' : ''}`} onClick={() => setPanel('settings')} title="Settings" aria-label="Settings">
           <IconSettings />
         </button>
+        <button className={`icon-btn${showAdvisor ? ' active' : ''}`} onClick={() => setShowAdvisor((v) => !v)} title="Advisor chat" aria-label="Advisor chat">
+          <IconSpark />
+        </button>
       </header>
 
       {workspace === 'plan' ? (
@@ -173,6 +176,7 @@ export function App() {
       {project && configured === 0 && !snapshot.settings.onboardingSeen ? (
         <OnboardingModal onClose={() => void guard(() => window.ventriee.saveSettings({ onboardingSeen: true }))} />
       ) : null}
+      {showAdvisor ? <SideChat onClose={() => setShowAdvisor(false)} /> : null}
       <Toast />
     </div>
   )
