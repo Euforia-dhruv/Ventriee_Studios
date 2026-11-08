@@ -76,6 +76,7 @@ export const IPC = {
   promptEnhance: 'prompt:enhance',
   promptSave: 'prompt:save',
   assignPrompt: 'prompt:assign',
+  chatAdvisor: 'chat:advisor',
   modelsDiscover: 'models:discover',
   modelPrefs: 'models:prefs',
   addProvider: 'provider:add',
@@ -157,6 +158,8 @@ export interface VentrieeApi {
   promptEnhance(input: { projectId: string; promptId: string; engine: EngineKind; model: string; endpoint: string }): Promise<PromptDoc>
   promptSave(input: { projectId: string; promptId: string; body: string; source: 'edited' | 'restored' }): Promise<PromptDoc>
   assignPrompt(input: AssignPromptInput): Promise<{ jobId: string; taskCount: number }>
+  /** Advisor side-chat: talk with a model that sees the current project state. */
+  chatAdvisor(input: { projectId: string; text: string }): Promise<{ reply: string; model: string }>
   modelsDiscover(projectId: string | null): Promise<ModelOption[]>
   saveModelPrefs(patch: Partial<ModelPrefs>): Promise<ModelPrefs>
   addProvider(input: {

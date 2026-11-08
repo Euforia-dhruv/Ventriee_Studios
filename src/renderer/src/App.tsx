@@ -7,6 +7,7 @@ import { Preview } from './components/Preview'
 import { CommandBar } from './components/CommandBar'
 import { Inspector } from './components/Inspector'
 import { Workspace } from './components/Workspace'
+import { SideChat } from './components/SideChat'
 import { SettingsPanel } from './panels/SettingsPanel'
 import { MemoryPanel } from './panels/MemoryPanel'
 import { AutomationsPanel, SkillsPanel } from './panels/SkillsPanel'
@@ -25,6 +26,7 @@ export function App() {
   const setWorkspace = useStore((s) => s.setWorkspace)
   const selectedAgentId = useStore((s) => s.selectedAgentId)
   const [newProject, setNewProject] = useState(false)
+  const [showAdvisor, setShowAdvisor] = useState(false)
 
   useEffect(() => {
     let mounted = true

@@ -10,7 +10,7 @@ import { PreviewService } from './preview'
 import { Orchestrator } from './orchestrator'
 import { PlanningService } from './planning'
 import { isInside } from './paths'
-import { detectProviders, testEngine, defaultEndpoint } from './engines'
+import { detectProviders, testEngine, defaultEndpoint, runEngine } from './engines'
 import { IPC } from '../shared/ipc'
 import type {
   Agent,
@@ -609,6 +609,43 @@ function registerIpc() {
     const result = await orchestrator.assignPrompt(input)
     debouncedNotify()
     return result
+  })
+
+  /**
+   * Advisor side-chat: answers on the planner engine, with a summary of the
+   * current project so it can give concrete improvement advice.
+   */
+  ipcMain.handle(IPC.chatAdvisor, async (_e, input: { projectId: string; text: string }) => {
+    const project = store.project(input.projectId)
+    if (!project) throw new Error('Project not found')
+    const tasks = store.tasks(project.id).slice(-12).map((t) => `- [${t.status}] ${t.title} (${t.role}${t.attempts ? `, attempt ${t.attempts}` : ''})`)
+    const latestPrompt = store.prompts(project.id).at(-1)
+    const job = store.runningJob(project.id)
+    const system = `You are the advisor inside Ventriee Studios, a local multi-agent AI studio. The owner is building "${project.name}" (${project.description || 'no description'}). Be concrete and practical. Give short, actionable advice: how to improve the prompt, split tasks, choose models, or interpret failures. Do not invent credentials or claim things ran that did not.
+
+Current project state:
+- Active run: ${job ? 'running' : 'none'}
+- Tasks:${tasks.length ? '\n' + tasks.join('\n') : ' none yet'}
+- Latest prompt revision: ${latestPrompt ? `"${latestPrompt.title}" (v${latestPrompt.version})` : 'none'}
+
+Answer the owner's question directly.`
+    const settings = store.settings()
+    const result = await runEngine(
+      {
+        engine: settings.plannerEngine,
+        model: settings.plannerModel,
+        endpoint: settings.plannerEndpoint,
+        system,
+        prompt: input.text,
+        cwd: project.path,
+        maxTokens: 8000,
+        timeoutMs: 120_000,
+        reasoning: 'auto'
+      },
+      creds
+    )
+    if (!result.ok) throw new Error(result.error ?? 'Advisor request failed')
+    return { reply: result.text, model: settings.plannerModel || 'default' }
   })
 
   ipcMain.handle(IPC.modelsDiscover, async (_e, projectId: string | null) => {

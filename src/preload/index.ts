@@ -67,6 +67,7 @@ const api: VentrieeApi = {
   promptEnhance: (input) => ipcRenderer.invoke(IPC.promptEnhance, input),
   promptSave: (input) => ipcRenderer.invoke(IPC.promptSave, input),
   assignPrompt: (input) => ipcRenderer.invoke(IPC.assignPrompt, input),
+  chatAdvisor: (input) => ipcRenderer.invoke(IPC.chatAdvisor, input),
   modelsDiscover: (projectId) => ipcRenderer.invoke(IPC.modelsDiscover, projectId),
   saveModelPrefs: (patch) => ipcRenderer.invoke(IPC.modelPrefs, patch),
   addProvider: (input) => ipcRenderer.invoke(IPC.addProvider, input),

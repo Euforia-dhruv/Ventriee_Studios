@@ -60,7 +60,7 @@ describe('reasoning effort on the wire', () => {
     expect(body.reasoning_effort).toBe('high')
   })
 
-  it('sends reasoning_effort none, which is how a thinking model is told to answer', async () => {
+  it('sends a thinking-disabled request for none on OpenAI-compatible providers', async () => {
     const server = await capture()
     open = server.close
     await runEngine(
@@ -77,7 +77,33 @@ describe('reasoning effort on the wire', () => {
       },
       creds
     )
-    expect(JSON.parse(server.bodies[0]).reasoning_effort).toBe('none')
+    const body = JSON.parse(server.bodies[0])
+    // OpenAI-compatible has no thinking-off field; none must not send a fake
+    // reasoning_effort value. DeepSeek/Deploy get { thinking: { type: 'disabled' } }.
+    expect(body.reasoning_effort).toBeUndefined()
+    expect(body.thinking).toBeUndefined()
+  })
+
+  it('sends thinking disabled for none on DeepSeek/Deploy', async () => {
+    const server = await capture()
+    open = server.close
+    await runEngine(
+      {
+        engine: 'api-deploy',
+        model: 'test-model',
+        endpoint: server.url,
+        system: 'sys',
+        prompt: 'go',
+        cwd: process.cwd(),
+        maxTokens: 100,
+        timeoutMs: 10_000,
+        reasoning: 'none'
+      },
+      creds
+    )
+    const body = JSON.parse(server.bodies[0])
+    expect(body.thinking).toEqual({ type: 'disabled' })
+    expect(body.reasoning_effort).toBeUndefined()
   })
 
   it('omits the field entirely on auto, so the model keeps its own default', async () => {

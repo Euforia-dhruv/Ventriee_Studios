@@ -382,6 +382,16 @@ async function openaiCompatible(
   let outTok = 0
   let finish: string | null = null
   try {
+    // Extended-thinking providers burn their whole output budget on reasoning and
+    // return no answer. When the owner set reasoning Off, send the provider's own
+    // "thinking disabled" field instead of omitting the parameter (which leaves
+    // the provider default, usually thinking on).
+    const thinkingOff = input.reasoning === 'none'
+    const thinkingDisable = thinkingOff
+      ? input.engine === 'api-deepseek' || input.engine === 'api-deploy'
+        ? { thinking: { type: 'disabled' } }
+        : {}
+      : {}
     const res = await fetch(url, {
       method: 'POST',
       headers,
@@ -391,8 +401,9 @@ async function openaiCompatible(
         stream: true,
         stream_options: { include_usage: true },
         max_tokens: input.maxTokens,
+        ...thinkingDisable,
         // Only sent when the owner picked a level; 'auto' leaves the model's own default.
-        ...(input.reasoning && input.reasoning !== 'auto' ? { reasoning_effort: input.reasoning } : {}),
+        ...(input.reasoning && input.reasoning !== 'auto' && input.reasoning !== 'none' ? { reasoning_effort: input.reasoning } : {}),
         messages: [
           { role: 'system', content: input.system },
           { role: 'user', content: input.prompt }
