@@ -1173,6 +1173,25 @@ Answer with a JSON object only: {"verdict":"pass"|"fail","reasoning":"...","bloc
     // attempts or an exhausted task is set ready and silently ignored (run #27).
     this.deps.store.updateTask(taskId, { status: 'ready', attempts: 0, review: 'Retry requested by owner' })
     this.deps.store.updateAgent(task.agentId ?? '', { status: 'idle' })
+    // A retry after the job closed needs a fresh job to drive the queue, or the
+    // ready task never runs (run #28).
+    const project = task.projectId ? this.deps.store.project(task.projectId) : null
+    if (project && !this.deps.store.runningJob(project.id)) {
+      const job: Job = {
+        id: newId('job'),
+        projectId: project.id,
+        instruction: `Retry: ${task.title}`,
+        status: 'running',
+        planSource: 'heuristic',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        error: null
+      }
+      this.deps.store.insertJob(job)
+      const roster = this.deps.store.agents(project.id).filter((a) => a.enabled)
+      this.stopping.delete(project.id)
+      void this.executeJob(job, project, roster, job.instruction)
+    }
     this.deps.notify()
   }
 
