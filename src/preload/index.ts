@@ -30,6 +30,7 @@ const api: VentrieeApi = {
   approveTask: (taskId) => ipcRenderer.invoke(IPC.approveTask, taskId),
   rejectTask: (taskId, reason) => ipcRenderer.invoke(IPC.rejectTask, taskId, reason),
   retryTask: (taskId) => ipcRenderer.invoke(IPC.retryTask, taskId),
+  deleteTask: (taskId) => ipcRenderer.invoke(IPC.deleteTask, taskId),
   stopAgent: (agentId) => ipcRenderer.invoke(IPC.stopAgent, agentId),
   pauseAgent: (agentId) => ipcRenderer.invoke(IPC.pauseAgent, agentId),
   resumeAgent: (agentId) => ipcRenderer.invoke(IPC.resumeAgent, agentId),

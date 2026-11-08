@@ -431,6 +431,15 @@ function registerIpc() {
     debouncedNotify()
   })
 
+  ipcMain.handle(IPC.deleteTask, async (_e, taskId: string) => {
+    const task = store.task(taskId)
+    if (!task) return
+    // Refuse to delete a task that is actively running.
+    if (task.status === 'running') throw new Error('Stop the worker before deleting a running task')
+    store.deleteTask(taskId)
+    debouncedNotify()
+  })
+
   ipcMain.handle(IPC.stopAgent, async (_e, agentId: string) => {
     orchestrator.stopAgent(agentId)
     debouncedNotify()

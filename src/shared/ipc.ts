@@ -44,6 +44,7 @@ export const IPC = {
   approveTask: 'task:approve',
   rejectTask: 'task:reject',
   retryTask: 'task:retry',
+  deleteTask: 'task:delete',
   stopAgent: 'agent:stop',
   pauseAgent: 'agent:pause',
   resumeAgent: 'agent:resume',
@@ -117,6 +118,7 @@ export interface VentrieeApi {
   approveTask(taskId: string): Promise<void>
   rejectTask(taskId: string, reason: string): Promise<void>
   retryTask(taskId: string): Promise<void>
+  deleteTask(taskId: string): Promise<void>
   stopAgent(agentId: string): Promise<void>
   pauseAgent(agentId: string): Promise<void>
   resumeAgent(agentId: string): Promise<void>
