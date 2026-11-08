@@ -1174,7 +1174,8 @@ Answer with a JSON object only: {"verdict":"pass"|"fail","reasoning":"...","bloc
     this.deps.store.updateTask(taskId, { status: 'ready', attempts: 0, review: 'Retry requested by owner' })
     this.deps.store.updateAgent(task.agentId ?? '', { status: 'idle' })
     // A retry after the job closed needs a fresh job to drive the queue, or the
-    // ready task never runs (run #28).
+    // ready task never runs (run #28). Run the existing queue directly: re-planning
+    // (executeJob) would duplicate the whole pipeline.
     const project = task.projectId ? this.deps.store.project(task.projectId) : null
     if (project && !this.deps.store.runningJob(project.id)) {
       const job: Job = {
@@ -1188,9 +1189,15 @@ Answer with a JSON object only: {"verdict":"pass"|"fail","reasoning":"...","bloc
         error: null
       }
       this.deps.store.insertJob(job)
-      const roster = this.deps.store.agents(project.id).filter((a) => a.enabled)
       this.stopping.delete(project.id)
-      void this.executeJob(job, project, roster, job.instruction)
+      void this.runQueue(job, project).then(() => {
+        const failed = this.deps.store.tasks(project.id).filter((t) => t.status === 'failed' || t.status === 'rework')
+        this.deps.store.updateJob(job.id, {
+          status: this.stopping.has(project.id) ? 'stopped' : failed.length ? 'failed' : 'done',
+          error: failed.length ? `${failed.length} task(s) need attention` : null
+        })
+        this.deps.notify()
+      })
     }
     this.deps.notify()
   }
