@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { guard, useStore } from '../store'
-import { IconChevron, IconPlus, IconSearch, IconStar } from '../icons'
+import { IconChevron, IconPlus, IconRefresh, IconSearch, IconStar } from '../icons'
 import type { EngineKind, ModelOption, ProviderConfig } from '../../../shared/types'
 
 export interface ResolvedModel {
@@ -147,7 +147,14 @@ export function ModelPicker({
 
           {models.length === 0 ? (
             <div className="mp-empty">
-              No models discovered yet. Add a provider, or check that a CLI is installed.
+              <span>No models discovered yet. Rescan, or add a provider.</span>
+              <button
+                className="btn tiny"
+                style={{ marginTop: 8 }}
+                onClick={() => void guard(() => window.ventriee.modelsDiscover(snapshot.activeProjectId))}
+              >
+                <IconRefresh width={10} height={10} /> Rescan models
+              </button>
             </div>
           ) : null}
 

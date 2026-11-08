@@ -271,29 +271,30 @@ export class PlanningService {
     const out: ModelOption[] = []
     const configs = this.store.providers()
 
+    // Probe every provider in parallel so one slow endpoint cannot stall the whole
+    // list (a stalled discovery left the picker empty on a multi-provider machine).
+    const probes: Promise<ModelOption[]>[] = []
     for (const config of configs) {
-      const options = await this.listProviderModels(config, projectRoot)
-      out.push(...options)
+      probes.push(this.listProviderModels(config, projectRoot))
     }
-
-    // Built-in engines that are present on this machine.
     for (const engine of ['cli-opencode', 'cli-claude', 'cli-codex', 'cli-gemini', 'cli-ollama'] as EngineKind[]) {
-      const listed = await this.cliModels(engine, projectRoot)
-      out.push(...listed)
+      probes.push(this.cliModels(engine, projectRoot))
     }
-
     for (const engine of ['api-ollama', 'api-lmstudio', 'api-vllm'] as EngineKind[]) {
-      const local = await this.httpModels(engine, engine, ENGINE_LABELS[engine], defaultEndpoint(engine), null)
-      out.push(...local)
+      probes.push(this.httpModels(engine, engine, ENGINE_LABELS[engine], defaultEndpoint(engine), null))
     }
-
     for (const engine of ['api-openai', 'api-anthropic', 'api-gemini', 'api-openrouter', 'api-deepseek', 'api-mistral', 'api-deploy', 'api-inception'] as EngineKind[]) {
       const key = this.creds.get(engine)
-      // Some providers publish their catalogue without a key (Inception does).
-      // Listing it without one shows a real model that only needs a key, rather
-      // than pretending the provider does not exist until it is configured.
-      const listed = await this.httpModels(engine, engine, ENGINE_LABELS[engine], defaultEndpoint(engine), key)
-      out.push(...listed.map((m) => (key ? m : { ...m, configured: false, note: 'Add an API key to use this model' })))
+      probes.push(
+        this.httpModels(engine, engine, ENGINE_LABELS[engine], defaultEndpoint(engine), key).then((listed) =>
+          key ? listed : listed.map((m) => ({ ...m, configured: false, note: 'Add an API key to use this model' }))
+        )
+      )
+    }
+
+    const settled = await Promise.allSettled(probes)
+    for (const result of settled) {
+      if (result.status === 'fulfilled') out.push(...result.value)
     }
 
     return dedupeModels(out)
